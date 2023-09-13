@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:social_meadia_app/util/flutter_error_notiy.dart';
 
 import '../component/my_button.dart';
 import '../component/text_field.dart';
@@ -111,8 +112,22 @@ class _LoginPageState extends State<LoginPage> {
                 MyButton(
                   text: "Sign in",
                   ontap: () {
-                    Util().signIn(emailcontroller.text.trim(),
-                        passwordcontroller.text.trim());
+                    if (emailcontroller.text.isEmpty) {
+                      Message.toastMessage(
+                        'Please enter email',
+                      );
+                    } else if (passwordcontroller.text.isEmpty) {
+                      Message.toastMessage(
+                        'Please enter password',
+                      );
+                    } else if (passwordcontroller.text.length < 6) {
+                      Message.toastMessage(
+                        'Please enter 6 digit password',
+                      );
+                    } else {
+                      Util().signIn(emailcontroller.text.trim(),
+                          passwordcontroller.text.trim());
+                    }
                   },
                 ),
                 //go to register app

@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:social_meadia_app/component/drawer.dart';
 import 'package:social_meadia_app/component/text_field.dart';
 import 'package:social_meadia_app/component/wall_post.dart';
+import 'package:social_meadia_app/pages/profile_page.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -22,9 +24,23 @@ class _HomeState extends State<Home> {
         'UserEmail': currentUser!.email,
         "Message": _textcontroller.text,
         "TimeStamp": Timestamp.now(),
+        "Likes": [],
       });
       _textcontroller.clear();
     }
+  }
+
+  // navigate to profile page
+
+  void goToProfilePage() {
+    //pop menu drawer
+
+    Navigator.pop(context);
+
+    // go to profile page
+
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => const ProfilePage()));
   }
 
   @override
@@ -35,14 +51,10 @@ class _HomeState extends State<Home> {
         appBar: AppBar(
           backgroundColor: Colors.grey[900],
           title: const Center(child: Text("The wall")),
-          actions: [
-            //signout Button
-            IconButton(
-                onPressed: () {
-                  FirebaseAuth.instance.signOut();
-                },
-                icon: const Icon(Icons.logout))
-          ],
+        ),
+        drawer: MyDrawer(
+          onProfileTap: goToProfilePage,
+          onSignout: FirebaseAuth.instance.signOut,
         ),
         body: Column(
           children: [
@@ -67,6 +79,8 @@ class _HomeState extends State<Home> {
                       return WallPost(
                         messsage: post['Message'],
                         user: post["UserEmail"],
+                        likes: List<String>.from(post['Likes'] ?? []),
+                        postId: post.id,
                       );
                     },
                   );

@@ -1,6 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:social_meadia_app/util/flutter_error_notiy.dart';
 
 class Util {
   // passwordReset function forgot password
@@ -29,13 +31,25 @@ class Util {
     }
   }
 
-//signIn() functiom
+  // signIn() function
+  Future<void> signIn(String email, String password) async {
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+    } on FirebaseAuthException catch (e) {
+      Message.toastMessage(e.message.toString());
 
-  Future signIn(String email, String password) async {
-    await FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
+      if (kDebugMode) {
+        print(e);
+      }
+    } catch (e) {
+      // Handle other exceptions
+      if (kDebugMode) {
+        print('Error: $e');
+      }
+    }
   }
 
   // Sign up function
@@ -46,16 +60,30 @@ class Util {
     String confirmPassword,
   ) async {
 //
-    // showDialog(
-    //     context: context,
-    //     builder: (context) => const Center(child: SingleChildScrollView()));
+    showDialog(
+        context: context,
+        builder: (context) => const Center(child: SingleChildScrollView()));
 
     if (passwordConfirmed(password, confirmPassword)) {
+      //try creating the user
       try {
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        //create the user
+        UserCredential userCredential =
+            await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: email,
           password: password,
         );
+
+        // after creating the user, create a new document on cloud firestore called Users
+        FirebaseFirestore.instance
+            .collection("Users")
+            .doc(userCredential.user!.email!)
+            .set({
+          'username': email.split('@')[0], //initial username
+          'bio': 'Empty bio.', //initial empty bio
+          //add any additional fields as neede
+        });
+
         showDialog(
           context: (context),
           builder: (_) {
